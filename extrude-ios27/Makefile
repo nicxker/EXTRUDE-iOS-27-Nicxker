@@ -1,5 +1,5 @@
 ARCHS = arm64 arm64e
-TARGET := iphone:clang:latest:15.0
+TARGET := iphone:clang:14.5:14.0
 INSTALL_TARGET_PROCESSES = SpringBoard
 
 THEOS_PACKAGE_SCHEME = rootless
