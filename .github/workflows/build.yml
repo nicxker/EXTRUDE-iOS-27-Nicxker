@@ -45,19 +45,19 @@ jobs:
       - name: Install dependencies, toolchain compatibility & ldid
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential fakeroot dpkg rsync perl curl cmake libplist-dev libssl-dev pkg-config libxml2 libncurses6 libtinfo6
+          sudo apt-get install -y -qq build-essential fakeroot dpkg rsync perl curl cmake libplist-dev libssl-dev pkg-config
           
-          # Solución de raíz para libtinfo.so.5 y libncurses.so.5 en Ubuntu moderno
-          TINFO6=$(find /usr/lib -name "libtinfo.so.6*" 2>/dev/null | head -n 1)
-          if [ -n "$TINFO6" ]; then
-            sudo ln -sf "$TINFO6" /usr/lib/x86_64-linux-gnu/libtinfo.so.5
-            sudo ln -sf "$TINFO6" /lib/x86_64-linux-gnu/libtinfo.so.5 || true
+          # Fix libtinfo.so.5 & libncurses.so.5 for Ubuntu
+          TINFO=$(find /usr/lib -name "libtinfo.so.*" 2>/dev/null | head -n 1)
+          if [ -n "$TINFO" ]; then
+            sudo ln -sf "$TINFO" /usr/lib/x86_64-linux-gnu/libtinfo.so.5
+            sudo ln -sf "$TINFO" /lib/x86_64-linux-gnu/libtinfo.so.5 || true
           fi
           
-          NCURSES6=$(find /usr/lib -name "libncurses.so.6*" 2>/dev/null | head -n 1)
-          if [ -n "$NCURSES6" ]; then
-            sudo ln -sf "$NCURSES6" /usr/lib/x86_64-linux-gnu/libncurses.so.5
-            sudo ln -sf "$NCURSES6" /lib/x86_64-linux-gnu/libncurses.so.5 || true
+          NCURSES=$(find /usr/lib -name "libncurses.so.*" 2>/dev/null | head -n 1)
+          if [ -n "$NCURSES" ]; then
+            sudo ln -sf "$NCURSES" /usr/lib/x86_64-linux-gnu/libncurses.so.5
+            sudo ln -sf "$NCURSES" /lib/x86_64-linux-gnu/libncurses.so.5 || true
           fi
           
           sudo ldconfig
@@ -77,7 +77,7 @@ jobs:
           rm toolchain.tar.lzma
           chmod +x theos/toolchain/linux/iphone/bin/*
           
-          # Verificar que clang ejecute sin error de librerías
+          # Verificar clang
           theos/toolchain/linux/iphone/bin/clang --version
 
       - name: Build package
