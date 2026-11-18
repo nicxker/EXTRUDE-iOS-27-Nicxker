@@ -49,7 +49,7 @@
         self.pidLabel = [[UILabel alloc] init];
         self.pidLabel.translatesAutoresizingMaskIntoConstraints = NO;
         self.pidLabel.font = [UIFont monospacedSystemFontOfSize:11 weight:UIFontWeightMedium];
-        self.pidLabel.textColor = [UIColor systemCyanColor];
+       self.pidLabel.textColor = [UIColor systemTealColor];
         [self.contentView addSubview:self.pidLabel];
         
         // Path label
