@@ -12,7 +12,7 @@
     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:processListVC];
     
     // Configure dark navigation bar appearance
-    if (@available(iOS 15.0, *)) {
+   if (@available(iOS 13.0, *)) {
         UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
         [appearance configureWithOpaqueBackground];
         appearance.backgroundColor = [UIColor colorWithRed:0.07 green:0.07 blue:0.10 alpha:1.0];
