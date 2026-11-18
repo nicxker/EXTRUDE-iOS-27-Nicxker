@@ -35,9 +35,9 @@ jobs:
           path: theos
           submodules: recursive
 
-      - name: Setup iOS SDK
+      - name: Setup iOS SDK (14.5 compatible with Clang 10)
         run: |
-          curl -sL https://github.com/theos/sdks/releases/latest/download/iPhoneOS16.5.sdk.tar.xz -o sdk.tar.xz
+          curl -sL https://github.com/theos/sdks/releases/latest/download/iPhoneOS14.5.sdk.tar.xz -o sdk.tar.xz
           mkdir -p theos/sdks
           tar -xf sdk.tar.xz -C theos/sdks
           rm sdk.tar.xz
@@ -68,7 +68,7 @@ jobs:
           rm toolchain.tar.lzma
           chmod +x theos/toolchain/linux/iphone/bin/*
           
-          # Verificar clang con las librerías oficiales
+          # Verificar clang
           theos/toolchain/linux/iphone/bin/clang --version
 
       - name: Build package
