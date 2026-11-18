@@ -66,6 +66,49 @@ static NSString * const kCellID = @"EXProcessCell";
 #pragma mark - Setup
 
 - (void)setupNavigationBar {
+    // Sort button (ActionSheet universal)
+    UIBarButtonItem *sortButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"arrow.up.arrow.down"]
+                                                                   style:UIBarButtonItemStylePlain
+                                                                  target:self
+                                                                  action:@selector(showSortSheet)];
+    
+    // Refresh button
+    UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"arrow.clockwise"]
+                                                                     style:UIBarButtonItemStylePlain
+                                                                    target:self
+                                                                    action:@selector(refreshProcesses)];
+    
+    self.navigationItem.rightBarButtonItems = @[refreshButton, sortButton];
+    
+    // Info button (left)
+    UIBarButtonItem *infoButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"info.circle"]
+                                                                  style:UIBarButtonItemStylePlain
+                                                                 target:self
+                                                                 action:@selector(showAbout)];
+    self.navigationItem.leftBarButtonItem = infoButton;
+}
+
+- (void)showSortSheet {
+    UIAlertController *sheet = [UIAlertController alertControllerWithTitle:@"Sort Processes By" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    [sheet addAction:[UIAlertAction actionWithTitle:@"Name" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        self.currentSort = EXSortOrderName;
+        [self refreshProcesses];
+    }]];
+    [sheet addAction:[UIAlertAction actionWithTitle:@"PID" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        self.currentSort = EXSortOrderPID;
+        [self refreshProcesses];
+    }]];
+    [sheet addAction:[UIAlertAction actionWithTitle:@"Memory" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        self.currentSort = EXSortOrderMemory;
+        [self refreshProcesses];
+    }]];
+    [sheet addAction:[UIAlertAction actionWithTitle:@"CPU" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        self.currentSort = EXSortOrderCPU;
+        [self refreshProcesses];
+    }]];
+    [sheet addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    [self presentViewController:sheet animated:YES completion:nil];
+}
     // Sort button
     UIAction *sortByName = [UIAction actionWithTitle:@"Name" image:[UIImage systemImageNamed:@"textformat.abc"] identifier:nil handler:^(UIAction *action) {
         self.currentSort = EXSortOrderName;
