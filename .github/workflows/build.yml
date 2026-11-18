@@ -9,8 +9,8 @@ on:
 
 jobs:
   build:
-    runs-on: macos-13  # Apple Silicon runner (M1)
-    
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,29 +22,37 @@ jobs:
           path: theos
           submodules: recursive
 
-      - name: Setup Theos SDKs
-        uses: actions/checkout@v4
-        with:
-          repository: theos/sdks
-          path: theos/sdks
-          sparse-checkout: |
-            iPhoneOS16.5.sdk
-          sparse-checkout-cone-mode: false
-
-      - name: Setup environment
+      - name: Setup iOS SDK
         run: |
-          echo "THEOS=$(pwd)/theos" >> $GITHUB_ENV
-          echo "$(pwd)/theos/bin" >> $GITHUB_PATH
+          curl -sL https://github.com/theos/sdks/releases/latest/download/iPhoneOS16.5.sdk.tar.xz -o sdk.tar.xz
+          mkdir -p theos/sdks
+          tar -xf sdk.tar.xz -C theos/sdks
+          rm sdk.tar.xz
 
-      - name: Install Theos dependencies
+      - name: Install dependencies
         run: |
-          brew install ldid dpkg make
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq build-essential fakeroot dpkg rsync perl curl cmake
+          # Install ldid
+          git clone --depth 1 https://github.com/ProcursusTeam/ldid.git /tmp/ldid
+          cd /tmp/ldid
+          make -j$(nproc)
+          sudo cp ldid /usr/local/bin/ldid
+          sudo chmod +x /usr/local/bin/ldid
+
+      - name: Setup Theos toolchain
+        run: |
+          # Download iOS cross-compilation toolchain for Linux
+          curl -sL https://github.com/sbingner/llvm-project/releases/latest/download/linux-ios-arm64e-clang-toolchain.tar.lzma -o toolchain.tar.lzma
+          mkdir -p theos/toolchain
+          tar --lzma -xf toolchain.tar.lzma -C theos/toolchain
+          rm toolchain.tar.lzma
 
       - name: Build package
         run: |
           export THEOS=$(pwd)/theos
           export PATH="$THEOS/bin:$PATH"
-          gmake package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 2>&1
+          make package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 2>&1
 
       - name: Upload .deb artifact
         uses: actions/upload-artifact@v4
