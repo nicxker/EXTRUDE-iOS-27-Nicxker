@@ -1,0 +1,9 @@
+Package: com.yourname.extrude
+Name: Extrude
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: A powerful process manager for iOS. View, search, pause, resume, and kill running processes and daemons. Inspired by the original Extrude by hans32.
+Maintainer: YourName
+Author: YourName
+Section: Utilities
+Depends: firmware (>= 15.0), mobilesubstrate
