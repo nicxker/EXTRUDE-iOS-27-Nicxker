@@ -15,6 +15,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Locate project directory
+        id: find-dir
+        run: |
+          if [ -f "Makefile" ]; then
+            echo "WORK_DIR=." >> $GITHUB_ENV
+          elif [ -f "extrude-ios27/Makefile" ]; then
+            echo "WORK_DIR=extrude-ios27" >> $GITHUB_ENV
+          else
+            DIR=$(find . -name "Makefile" -not -path "*/.*" | head -n 1 | xargs dirname)
+            echo "WORK_DIR=$DIR" >> $GITHUB_ENV
+          fi
+          echo "Found project directory: $WORK_DIR"
+          ls -la
+
       - name: Setup Theos
         uses: actions/checkout@v4
         with:
@@ -33,7 +47,6 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq build-essential fakeroot dpkg rsync perl curl cmake libplist-dev libssl-dev pkg-config
-          # Build ldid
           git clone --depth 1 https://github.com/ProcursusTeam/ldid.git /tmp/ldid
           cd /tmp/ldid
           make -j$(nproc)
@@ -51,18 +64,23 @@ jobs:
         run: |
           export THEOS=$(pwd)/theos
           export PATH="$THEOS/bin:$PATH"
+          cd ${{ env.WORK_DIR }}
           make package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 2>&1
 
       - name: Upload .deb artifact
         uses: actions/upload-artifact@v4
         with:
           name: extrude-deb
-          path: packages/*.deb
+          path: |
+            packages/*.deb
+            ${{ env.WORK_DIR }}/packages/*.deb
           if-no-files-found: error
 
       - name: Create Release (on tag)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: packages/*.deb
+          files: |
+            packages/*.deb
+            ${{ env.WORK_DIR }}/packages/*.deb
           generate_release_notes: true
