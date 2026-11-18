@@ -49,7 +49,6 @@ static NSString * const kCellID = @"EXProcessCell";
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    // Auto-refresh every 3 seconds
     self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:3.0
                                                         target:self
                                                       selector:@selector(refreshProcesses)
@@ -66,13 +65,11 @@ static NSString * const kCellID = @"EXProcessCell";
 #pragma mark - Setup
 
 - (void)setupNavigationBar {
-    // Sort button (ActionSheet universal)
     UIBarButtonItem *sortButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"arrow.up.arrow.down"]
                                                                    style:UIBarButtonItemStylePlain
                                                                   target:self
                                                                   action:@selector(showSortSheet)];
     
-    // Refresh button
     UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"arrow.clockwise"]
                                                                      style:UIBarButtonItemStylePlain
                                                                     target:self
@@ -80,7 +77,6 @@ static NSString * const kCellID = @"EXProcessCell";
     
     self.navigationItem.rightBarButtonItems = @[refreshButton, sortButton];
     
-    // Info button (left)
     UIBarButtonItem *infoButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"info.circle"]
                                                                   style:UIBarButtonItemStylePlain
                                                                  target:self
@@ -109,50 +105,12 @@ static NSString * const kCellID = @"EXProcessCell";
     [sheet addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     [self presentViewController:sheet animated:YES completion:nil];
 }
-    // Sort button
-    UIAction *sortByName = [UIAction actionWithTitle:@"Name" image:[UIImage systemImageNamed:@"textformat.abc"] identifier:nil handler:^(UIAction *action) {
-        self.currentSort = EXSortOrderName;
-        [self refreshProcesses];
-    }];
-    UIAction *sortByPID = [UIAction actionWithTitle:@"PID" image:[UIImage systemImageNamed:@"number"] identifier:nil handler:^(UIAction *action) {
-        self.currentSort = EXSortOrderPID;
-        [self refreshProcesses];
-    }];
-    UIAction *sortByMemory = [UIAction actionWithTitle:@"Memory" image:[UIImage systemImageNamed:@"memorychip"] identifier:nil handler:^(UIAction *action) {
-        self.currentSort = EXSortOrderMemory;
-        [self refreshProcesses];
-    }];
-    UIAction *sortByCPU = [UIAction actionWithTitle:@"CPU" image:[UIImage systemImageNamed:@"cpu"] identifier:nil handler:^(UIAction *action) {
-        self.currentSort = EXSortOrderCPU;
-        [self refreshProcesses];
-    }];
-    
-    UIMenu *sortMenu = [UIMenu menuWithTitle:@"Sort By" children:@[sortByName, sortByPID, sortByMemory, sortByCPU]];
-    UIBarButtonItem *sortButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"arrow.up.arrow.down"]
-                                                                  menu:sortMenu];
-    
-    // Refresh button
-    UIBarButtonItem *refreshButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"arrow.clockwise"]
-                                                                     style:UIBarButtonItemStylePlain
-                                                                    target:self
-                                                                    action:@selector(refreshProcesses)];
-    
-    self.navigationItem.rightBarButtonItems = @[refreshButton, sortButton];
-    
-    // Info button (left)
-    UIBarButtonItem *infoButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"info.circle"]
-                                                                  style:UIBarButtonItemStylePlain
-                                                                 target:self
-                                                                 action:@selector(showAbout)];
-    self.navigationItem.leftBarButtonItem = infoButton;
-}
 
 - (void)setupFilterSegment {
     self.filterSegment = [[UISegmentedControl alloc] initWithItems:@[@"All", @"User", @"System", @"Apps", @"Daemons"]];
     self.filterSegment.selectedSegmentIndex = 0;
     self.filterSegment.translatesAutoresizingMaskIntoConstraints = NO;
     
-    // Style
     self.filterSegment.backgroundColor = [UIColor colorWithRed:0.12 green:0.12 blue:0.16 alpha:1.0];
     self.filterSegment.selectedSegmentTintColor = [UIColor systemBlueColor];
     [self.filterSegment setTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor lightGrayColor]} forState:UIControlStateNormal];
@@ -244,7 +202,7 @@ static NSString * const kCellID = @"EXProcessCell";
 
 - (void)showAbout {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Extrude"
-                                                                  message:@"Process Manager for iOS 27.2\n\nInspired by hans32's Extrude.\nBuilt for rootless jailbreak environments.\n\nv1.0.0"
+                                                                  message:@"Process Manager for iOS\n\nInspired by hans32's Extrude.\nBuilt for rootless jailbreak environments.\n\nv1.0.0"
                                                            preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
@@ -293,7 +251,6 @@ static NSString * const kCellID = @"EXProcessCell";
     
     EXProcessInfo *proc = self.processes[indexPath.row];
     
-    // Kill action (red)
     UIContextualAction *killAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
                                                                             title:@"Kill"
                                                                           handler:^(UIContextualAction *action, UIView *sourceView, void (^completionHandler)(BOOL)) {
@@ -302,7 +259,6 @@ static NSString * const kCellID = @"EXProcessCell";
     killAction.backgroundColor = [UIColor systemRedColor];
     killAction.image = [UIImage systemImageNamed:@"xmark.circle.fill"];
     
-    // Pause/Resume action (orange/green)
     NSString *pauseTitle = proc.isSuspended ? @"Resume" : @"Pause";
     UIContextualAction *pauseAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal
                                                                              title:pauseTitle
@@ -355,7 +311,6 @@ static NSString * const kCellID = @"EXProcessCell";
                                                    previewProvider:nil
                                                     actionProvider:^UIMenu *(NSArray<UIMenuElement *> *suggestedActions) {
         
-        // Copy Name
         UIAction *copyName = [UIAction actionWithTitle:@"Copy Name"
                                                  image:[UIImage systemImageNamed:@"doc.on.doc"]
                                             identifier:nil
@@ -363,7 +318,6 @@ static NSString * const kCellID = @"EXProcessCell";
             [UIPasteboard generalPasteboard].string = proc.name;
         }];
         
-        // Copy PID
         UIAction *copyPID = [UIAction actionWithTitle:@"Copy PID"
                                                 image:[UIImage systemImageNamed:@"number"]
                                            identifier:nil
@@ -371,7 +325,6 @@ static NSString * const kCellID = @"EXProcessCell";
             [UIPasteboard generalPasteboard].string = [NSString stringWithFormat:@"%d", proc.pid];
         }];
         
-        // Copy Path
         UIAction *copyPath = [UIAction actionWithTitle:@"Copy Path"
                                                  image:[UIImage systemImageNamed:@"folder"]
                                             identifier:nil
@@ -381,7 +334,6 @@ static NSString * const kCellID = @"EXProcessCell";
         
         UIMenu *copyMenu = [UIMenu menuWithTitle:@"Copy" image:[UIImage systemImageNamed:@"doc.on.clipboard"] identifier:nil options:0 children:@[copyName, copyPID, copyPath]];
         
-        // Open in Filza
         UIAction *openFilza = [UIAction actionWithTitle:@"Open in Filza"
                                                   image:[UIImage systemImageNamed:@"folder.badge.gearshape"]
                                              identifier:nil
@@ -394,7 +346,6 @@ static NSString * const kCellID = @"EXProcessCell";
             }
         }];
         
-        // Pause / Resume
         NSString *pauseTitle = proc.isSuspended ? @"Resume Process" : @"Pause Process";
         NSString *pauseImage = proc.isSuspended ? @"play.circle" : @"pause.circle";
         UIAction *pauseAction = [UIAction actionWithTitle:pauseTitle
@@ -409,7 +360,6 @@ static NSString * const kCellID = @"EXProcessCell";
             [self refreshProcesses];
         }];
         
-        // Kill
         UIAction *killAction = [UIAction actionWithTitle:@"Kill Process"
                                                    image:[UIImage systemImageNamed:@"xmark.circle"]
                                               identifier:nil
