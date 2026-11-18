@@ -19,3 +19,5 @@ include $(THEOS_MAKE_PATH)/application.mk
 
 after-install::
 	install.exec "uicache -p /var/jb/Applications/Extrude.app"
+Extrude_FRAMEWORKS = UIKit CoreGraphics Foundation
+Extrude_LIBRARIES = c++
