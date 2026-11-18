@@ -7,7 +7,7 @@
 #import <signal.h>
 #import <mach/mach.h>
 #import <mach/task_info.h>
-#import <libproc.h>
+#import "libproc.h"
 #import <pwd.h>
 
 @implementation EXProcessManager
