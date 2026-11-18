@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14  # Apple Silicon runner (M1)
+    runs-on: macos-13  # Apple Silicon runner (M1)
     
     steps:
       - name: Checkout repository
