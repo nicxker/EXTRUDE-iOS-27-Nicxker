@@ -42,10 +42,27 @@ jobs:
           tar -xf sdk.tar.xz -C theos/sdks
           rm sdk.tar.xz
 
-      - name: Install dependencies & ldid
+      - name: Install dependencies, toolchain compatibility & ldid
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential fakeroot dpkg rsync perl curl cmake libplist-dev libssl-dev pkg-config
+          sudo apt-get install -y -qq build-essential fakeroot dpkg rsync perl curl cmake libplist-dev libssl-dev pkg-config libxml2 libncurses6 libtinfo6
+          
+          # Solución de raíz para libtinfo.so.5 y libncurses.so.5 en Ubuntu moderno
+          TINFO6=$(find /usr/lib -name "libtinfo.so.6*" 2>/dev/null | head -n 1)
+          if [ -n "$TINFO6" ]; then
+            sudo ln -sf "$TINFO6" /usr/lib/x86_64-linux-gnu/libtinfo.so.5
+            sudo ln -sf "$TINFO6" /lib/x86_64-linux-gnu/libtinfo.so.5 || true
+          fi
+          
+          NCURSES6=$(find /usr/lib -name "libncurses.so.6*" 2>/dev/null | head -n 1)
+          if [ -n "$NCURSES6" ]; then
+            sudo ln -sf "$NCURSES6" /usr/lib/x86_64-linux-gnu/libncurses.so.5
+            sudo ln -sf "$NCURSES6" /lib/x86_64-linux-gnu/libncurses.so.5 || true
+          fi
+          
+          sudo ldconfig
+
+          # Compilar ldid
           git clone --depth 1 https://github.com/ProcursusTeam/ldid.git /tmp/ldid
           cd /tmp/ldid
           make -j$(nproc)
@@ -59,8 +76,9 @@ jobs:
           tar --strip-components=1 --lzma -xf toolchain.tar.lzma -C theos/toolchain/linux/iphone
           rm toolchain.tar.lzma
           chmod +x theos/toolchain/linux/iphone/bin/*
-          echo "Toolchain clang check:"
-          ls -la theos/toolchain/linux/iphone/bin/clang
+          
+          # Verificar que clang ejecute sin error de librerías
+          theos/toolchain/linux/iphone/bin/clang --version
 
       - name: Build package
         run: |
