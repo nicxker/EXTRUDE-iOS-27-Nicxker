@@ -16,7 +16,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Locate project directory
-        id: find-dir
         run: |
           if [ -f "Makefile" ]; then
             echo "WORK_DIR=." >> $GITHUB_ENV
@@ -26,7 +25,6 @@ jobs:
             DIR=$(find . -name "Makefile" -not -path "*/.*" -not -path "./theos/*" | head -n 1 | xargs dirname)
             echo "WORK_DIR=$DIR" >> $GITHUB_ENV
           fi
-          echo "Found project directory: $WORK_DIR"
 
       - name: Setup Theos
         uses: actions/checkout@v4
@@ -35,46 +33,34 @@ jobs:
           path: theos
           submodules: recursive
 
-         - name: Setup iOS SDK (13.7 compatible with Linux ld64)
+      - name: Setup iOS SDK
         run: |
           curl -sL https://github.com/theos/sdks/releases/latest/download/iPhoneOS13.7.sdk.tar.xz -o sdk.tar.xz
           mkdir -p theos/sdks
           tar -xf sdk.tar.xz -C theos/sdks
           rm sdk.tar.xz
-        run: |
-          curl -sL https://github.com/theos/sdks/releases/latest/download/iPhoneOS14.5.sdk.tar.xz -o sdk.tar.xz
-          mkdir -p theos/sdks
-          tar -xf sdk.tar.xz -C theos/sdks
-          rm sdk.tar.xz
 
-      - name: Install dependencies & native libtinfo5/libncurses5
+      - name: Install dependencies and tools
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq build-essential fakeroot dpkg rsync perl curl cmake libplist-dev libssl-dev pkg-config
-
-          # Instalar paquetes oficiales con símbolos de versión NCURSES_TINFO_5.0
           curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.2-0ubuntu2.1_amd64.deb -o /tmp/libtinfo5.deb
           curl -sL http://archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libncurses5_6.2-0ubuntu2.1_amd64.deb -o /tmp/libncurses5.deb
           sudo dpkg -i /tmp/libtinfo5.deb /tmp/libncurses5.deb || sudo apt-get install -f -y -qq
           rm /tmp/libtinfo5.deb /tmp/libncurses5.deb
-
-          # Compilar ldid
           git clone --depth 1 https://github.com/ProcursusTeam/ldid.git /tmp/ldid
           cd /tmp/ldid
           make -j$(nproc)
           sudo cp ldid /usr/local/bin/ldid
           sudo chmod +x /usr/local/bin/ldid
 
-      - name: Setup Theos toolchain (LLVM/Clang for Linux)
+      - name: Setup Theos toolchain
         run: |
           mkdir -p theos/toolchain/linux/iphone
           curl -sL https://github.com/sbingner/llvm-project/releases/download/v10.0.0-1/linux-ios-arm64e-clang-toolchain.tar.lzma -o toolchain.tar.lzma
           tar --strip-components=1 --lzma -xf toolchain.tar.lzma -C theos/toolchain/linux/iphone
           rm toolchain.tar.lzma
           chmod +x theos/toolchain/linux/iphone/bin/*
-          
-          # Verificar clang
-          theos/toolchain/linux/iphone/bin/clang --version
 
       - name: Build package
         run: |
@@ -91,12 +77,3 @@ jobs:
             packages/*.deb
             ${{ env.WORK_DIR }}/packages/*.deb
           if-no-files-found: error
-
-      - name: Create Release (on tag)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            packages/*.deb
-            ${{ env.WORK_DIR }}/packages/*.deb
-          generate_release_notes: true
