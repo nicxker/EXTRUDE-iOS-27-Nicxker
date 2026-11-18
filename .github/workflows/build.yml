@@ -29,11 +29,11 @@ jobs:
           tar -xf sdk.tar.xz -C theos/sdks
           rm sdk.tar.xz
 
-      - name: Install dependencies
+      - name: Install dependencies & ldid
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential fakeroot dpkg rsync perl curl cmake
-          # Install ldid
+          sudo apt-get install -y -qq build-essential fakeroot dpkg rsync perl curl cmake libplist-dev libssl-dev pkg-config
+          # Build ldid
           git clone --depth 1 https://github.com/ProcursusTeam/ldid.git /tmp/ldid
           cd /tmp/ldid
           make -j$(nproc)
@@ -42,10 +42,9 @@ jobs:
 
       - name: Setup Theos toolchain
         run: |
-          # Download iOS cross-compilation toolchain for Linux
           curl -sL https://github.com/sbingner/llvm-project/releases/latest/download/linux-ios-arm64e-clang-toolchain.tar.lzma -o toolchain.tar.lzma
-          mkdir -p theos/toolchain
-          tar --lzma -xf toolchain.tar.lzma -C theos/toolchain
+          mkdir -p theos/toolchain/linux/iphone
+          tar --lzma -xf toolchain.tar.lzma -C theos/toolchain/linux/iphone
           rm toolchain.tar.lzma
 
       - name: Build package
