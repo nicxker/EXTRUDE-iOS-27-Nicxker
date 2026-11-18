@@ -11,7 +11,7 @@ APPLICATION_NAME = Extrude
 Extrude_FILES = $(wildcard Sources/*.m) $(wildcard Sources/*.mm)
 Extrude_FRAMEWORKS = UIKit CoreGraphics Foundation
 Extrude_PRIVATE_FRAMEWORKS = 
-Extrude_CFLAGS = -fobjc-arc -Wno-deprecated-declarations
+Extrude_CFLAGS = -fobjc-arc -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-function -Wno-error
 Extrude_CODESIGN_FLAGS = -Sentitlements.plist
 Extrude_INSTALL_PATH = /var/jb/Applications
 
