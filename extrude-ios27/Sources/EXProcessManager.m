@@ -73,15 +73,16 @@ int proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer, int buffersize
 }
 #endif
 
+static EXProcessManager *_sharedManagerInstance = nil;
+
 @implementation EXProcessManager
 
 + (instancetype)sharedManager {
-    static EXProcessManager *instance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        instance = [[self alloc] init];
+        _sharedManagerInstance = [[self alloc] init];
     });
-    return instance;
+    return _sharedManagerInstance;
 }
 
 #pragma mark - Process Enumeration
